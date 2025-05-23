@@ -19,17 +19,24 @@ final class MovieStore {
 
     func loadTopRatedMovies() async throws {
         let fetched = try await movieNetworkManager.load(endpoint: .topRated, decodeToType: MovieApiResponseModel.self).results
-        topRated = Array(fetched.prefix(5))
+        
+        await MainActor.run { [weak self] in
+            self?.topRated = Array(fetched.prefix(5))
+        }
     }
 
     func loadPopularMovies() async throws {
         let fetched = try await movieNetworkManager.load(endpoint: .popular, decodeToType: MovieApiResponseModel.self).results
-        popular = Array(fetched.prefix(5))
+        await MainActor.run { [weak self] in
+            self?.popular = Array(fetched.prefix(5))
+        }
     }
 
     func loadNowPlayingMovies() async throws {
         let fetched = try await movieNetworkManager.load(endpoint: .nowPlaying, decodeToType: MovieApiResponseModel.self).results
-        nowPlaying = Array(fetched.prefix(5))
+        await MainActor.run { [weak self] in
+            self?.nowPlaying = Array(fetched.prefix(5))
+        }
     }
 
     func loadDetails(for id: Int) async throws -> MovieDetailsApiModel {
