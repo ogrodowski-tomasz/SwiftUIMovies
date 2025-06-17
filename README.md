@@ -6,8 +6,8 @@ SwiftUIMovies is a modern iOS application built with SwiftUI, designed to provid
 
 ## Supported iOS Version
 
-- **Minimum iOS Version:** iOS 16.0  
-  (SwiftUI and SwiftData features used in the project require iOS 16 or later.)
+- **Minimum iOS Version:** iOS 18.1  
+  (SwiftUI and SwiftData features used in the project require iOS 18.1 or later.)
 
 ---
 
@@ -137,7 +137,7 @@ SwiftUIMovies is a movie discovery and management app that allows users to:
 2. **Install dependencies** (via Swift Package Manager and CocoaPods if needed for Firebase)
 3. **Configure Firebase**
    - Add your `GoogleService-Info.plist` to the project.
-4. **Build and run** on a device or simulator running iOS 16.0 or later.
+4. **Build and run** on a device or simulator running iOS 18.1 or later.
 
 ---
 
