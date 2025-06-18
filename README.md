@@ -1,6 +1,6 @@
 # SwiftUIMovies
 
-SwiftUIMovies is a modern iOS application built with SwiftUI, designed to provide users with a rich and interactive experience for discovering, browsing, and managing movies. The app leverages Firebase for authentication and data storage, and integrates with external movie APIs to fetch up-to-date movie information.
+SwiftUIMovies is a modern iOS application built with SwiftUI, designed to provide users with a rich and interactive experience for discovering, browsing, and managing movies. The app leverages Firebase for;
 
 ---
 

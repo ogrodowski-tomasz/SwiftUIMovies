@@ -12,7 +12,7 @@ struct LoginScreen: View {
                 await login(with: loginForm)
             }
         }
-        .navigationTitle("Login")
+        .inlineNavigationTitle("Login")
     }
 
     private func login(with loginForm: AuthForm) async  {

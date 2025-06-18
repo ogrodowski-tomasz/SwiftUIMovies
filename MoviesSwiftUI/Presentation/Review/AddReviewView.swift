@@ -5,6 +5,7 @@ struct AddReviewView: View {
 
     // MARK: - ENVIRONMENT
     @Environment(\.modelContext) private var modelContext
+    @Environment(Router.self) private var router: Router
 
     // MARK: - STATE
     @State private var reviewModel: ReviewModel? = nil
@@ -42,8 +43,7 @@ struct AddReviewView: View {
             }
             .disabled(submitDisabled)
         }
-        .navigationTitle(movie.title)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineNavigationTitle(movie.title)
         .onAppear {
             fetchReviewModel()
         }
@@ -78,6 +78,7 @@ struct AddReviewView: View {
     private func save() {
         do {
             try modelContext.save()
+            router.pop()
         } catch {
             print("DEBUG: Error saving context: \(error.localizedDescription)")
         }

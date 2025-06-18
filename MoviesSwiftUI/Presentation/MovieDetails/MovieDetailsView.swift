@@ -33,9 +33,7 @@ struct MovieDetailsView: View {
         .listSectionSpacing(0)
         .listStyle(.plain)
         .scrollIndicators(.hidden)
-        .navigationTitle(movie.title)
-        .navigationBarTitleDisplayMode(.inline)
-
+        .inlineNavigationTitle(movie.title)
     }
 
     var poster: some View {

@@ -16,6 +16,7 @@ struct MovieDetailsScreen: View {
 
     // MARK: - QUERY
     @Query private var favorites: [FavoriteMovie]
+    @Query private var reviews: [ReviewModel]
 
     // MARK: - PROPERTIES
     let id: Int
@@ -23,6 +24,7 @@ struct MovieDetailsScreen: View {
     // MARK: - INITIALIZER
     init(id: Int) {
         self.id = id
+        _reviews = Query(filter: #Predicate<ReviewModel> { $0.id == id })
     }
 
     // MARK: - BODY
@@ -47,14 +49,31 @@ struct MovieDetailsScreen: View {
 
             ToolbarItem(placement: .bottomBar) {
                 Button {
-                    guard let movieDetails else { return }
+                    guard let movieDetails = movieDetails else { return }
                     router.navigate(to: .review(movie: movieDetails))
                 } label: {
-                    Text("Leave a review!")
-                        .foregroundStyle(.blue)
+                    if let review = reviews.first, let rating = review.rating {
+                        HStack(spacing: 10) {
+                            Text("You've rated this movie:")
+                            .opacity(0.75)
+                            Text("\(rating)/10")
+                            .bold()
+                            
+                            
+                            Image(systemName: "pencil")
+                                .foregroundStyle(.blue)
+                        }
+                        .foregroundStyle(.black)
+.font(.headline)
                         .padding()
-                        .padding(.horizontal)
-                        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    } else {
+                        Text("Leave a review!")
+                            .foregroundStyle(.blue)
+                            .padding()
+                            .padding(.horizontal)
+                            .frame(maxWidth: .infinity)
+                    }
                 }
             }
         }

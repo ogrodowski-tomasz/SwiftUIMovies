@@ -47,7 +47,7 @@ struct FavoritesScreen: View {
                 }
             }
         }
-        .navigationTitle("Favorites \(favorites.count > 0 ? "(\(favorites.count))" : "")")
+        .inlineNavigationTitle("Favorites \(favorites.count > 0 ? "(\(favorites.count))" : "")")
         .toolbar {
             if !favorites.isEmpty {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -61,6 +61,9 @@ struct FavoritesScreen: View {
     private func deleteAllFavorites() {
         for favorite in favorites {
             context.delete(favorite)
+        }
+        for review in reviews {
+            context.delete(review)
         }
         save()
     }

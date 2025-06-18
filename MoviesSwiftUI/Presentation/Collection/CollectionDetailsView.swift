@@ -18,8 +18,7 @@ struct CollectionDetailsView: View {
             }
             .padding(.horizontal)
         }
-        .navigationTitle(collectionDetails.name)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineNavigationTitle(collectionDetails.name)
     }
 
     // MARK: - VIEW COMPONENTS

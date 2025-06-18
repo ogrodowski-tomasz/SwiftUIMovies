@@ -32,7 +32,7 @@ struct RegisterScreen: View {
         }, message: {
             Text("Registered successfully! Now you can log in.")
         })
-        .navigationTitle("Register")
+        .inlineNavigationTitle("Register")
     }
 
     private func register(with form: AuthForm) async  {
@@ -40,6 +40,7 @@ struct RegisterScreen: View {
             try await currentUserStore.register(with: form)
             userRegisteredSuccess = true
         } catch {
+            print("DEBUG: \(error.localizedDescription)")
             showError(error, "try again", nil)
         }
     }

@@ -10,7 +10,7 @@ struct UserProfileScreen: View {
                 ProgressView()
             }
         }
-        .navigationTitle("Profile")
+        .inlineNavigationTitle("Profile")
     }
 }
 

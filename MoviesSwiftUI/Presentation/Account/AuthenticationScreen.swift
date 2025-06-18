@@ -8,7 +8,7 @@ struct AuthenticationScreen: View {
         Group {
             AuthenticationView()
         }
-        .navigationTitle("Authentication")
+        .inlineNavigationTitle("Authentication")
     }
 }
 

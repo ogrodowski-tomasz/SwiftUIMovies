@@ -21,7 +21,7 @@ struct MovieListScreen: View {
                 MovieListView(movies: popular, sectionTitle: "Popular")
             }
         }
-        .navigationTitle("Movie List")
+        .inlineNavigationTitle("Movie List")
         .task {
             await loadData()
         }

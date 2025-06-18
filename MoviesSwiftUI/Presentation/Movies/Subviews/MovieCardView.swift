@@ -39,12 +39,14 @@ struct MovieCardView: View {
                 }
             }
             if let reviewText = review?.review, let reviewRating = review?.rating {
-                Divider()
-                Text(reviewText)
-                    .font(.caption)
-                    .italic()
-                Text("\(reviewRating)/10")
-                    .bold()
+                HStack(spacing: 5) {
+                    Text("\(reviewRating)/10")
+                        .bold()
+
+                    Text(reviewText)
+                        .font(.caption)
+                        .italic()
+                }
             }
         }
     }

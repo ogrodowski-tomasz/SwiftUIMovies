@@ -9,6 +9,7 @@ import SwiftUI
 enum AppTab: Hashable, Identifiable, CaseIterable {
     case movies
     case favorites
+    case search
     case settings
 
     var id: AppTab { self }
@@ -20,6 +21,8 @@ enum AppTab: Hashable, Identifiable, CaseIterable {
             Label("Movies", systemImage: "tree")
         case .favorites:
             Label("Favorites", systemImage: "heart.fill")
+        case .search:
+            Label("Search", systemImage: "magnifyingglass")
         case .settings:
             Label("Settings", systemImage: "gear")
         }
@@ -32,6 +35,8 @@ enum AppTab: Hashable, Identifiable, CaseIterable {
             MoviesNavigationStack()
         case .favorites:
             FavoritesNavigationStack()
+        case .search:
+            SearchNavigationStack()
         case .settings:
             SettingsNavigationStack()
         }
@@ -106,6 +111,7 @@ class Router {
     var movieTabRoutes: [AppRoute] = []
     var favoritesTabRoutes: [AppRoute] = []
     var settingsTabRoutes: [AppRoute] = []
+    var searchTabRoutes: [AppRoute] = []
 
 
     func setCurrentTab(_ tab: AppTab, toRoot: Bool = false) {
@@ -126,6 +132,8 @@ class Router {
             favoritesTabRoutes.append(path)
         case .settings:
             settingsTabRoutes.append(path)
+        case .search:
+            searchTabRoutes.append(path)
         }
     }
 
@@ -140,6 +148,9 @@ class Router {
         case .settings:
             guard !settingsTabRoutes.isEmpty else { return }
             settingsTabRoutes.removeLast()
+        case .search:
+            guard !searchTabRoutes.isEmpty else { return }
+            searchTabRoutes.removeLast()
         }
     }
 
@@ -152,6 +163,8 @@ class Router {
             favoritesTabRoutes.removeAll()
         case .settings:
             settingsTabRoutes.removeAll()
+        case .search:
+            searchTabRoutes.removeAll()
         }
     }
 }
