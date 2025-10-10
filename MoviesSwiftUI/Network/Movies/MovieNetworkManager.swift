@@ -3,7 +3,14 @@ import Foundation
 // MARK: - PROTOCOL
 
 protocol MovieNetworkManagerProtocol {
-    func load<T: Codable>(endpoint: MovieEndpoint, decodeToType type: T.Type) async throws -> T
+    func load<T: Codable>(endpoint: MovieEndpoint, decodeToType type: T.Type, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy?) async throws -> T
+}
+
+extension MovieNetworkManagerProtocol {
+    func load<T: Codable>(endpoint: MovieEndpoint, decodeToType type: T.Type, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = .convertFromSnakeCase) async throws -> T {
+        try await load(endpoint: endpoint, decodeToType: type, keyDecodingStrategy: keyDecodingStrategy)
+    }
+
 }
 
 // MARK: - IMPLEMENTATION
@@ -12,12 +19,12 @@ struct MovieNetworkManager: MovieNetworkManagerProtocol {
 
     let httpClient: HTTPClientProtocol
 
-    func load<T: Codable>(endpoint: MovieEndpoint, decodeToType type: T.Type) async throws -> T {
+    func load<T: Codable>(endpoint: MovieEndpoint, decodeToType type: T.Type, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy?) async throws -> T {
         guard let url = endpoint.url else {
             throw NetworkError.invalidURL
         }
         let resource = Resource(url: url, modelType: T.self)
-        return try await httpClient.load(resource, keyDecodingStrategy: .convertFromSnakeCase)
+        return try await httpClient.load(resource, keyDecodingStrategy: keyDecodingStrategy)
     }
 }
 

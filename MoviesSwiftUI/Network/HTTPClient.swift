@@ -107,6 +107,12 @@ struct HTTPClient: HTTPClientProtocol {
         }
 
         do {
+            let jsonObject = try JSONSerialization.jsonObject(with: data)
+            let prettyData = try JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted)
+            let prettyString = String(data: prettyData, encoding: .utf8) ?? ""
+            
+            print("DEBUG: JSON for url \(resource.url): \(prettyString)")
+            
             let decoder = JSONDecoder()
             if let keyDecodingStrategy {
                 decoder.keyDecodingStrategy = keyDecodingStrategy

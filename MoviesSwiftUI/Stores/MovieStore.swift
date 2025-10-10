@@ -46,4 +46,8 @@ final class MovieStore {
     func loadCast(for id: Int) async throws -> MovieCastApiResponseModel {
         return try await movieNetworkManager.load(endpoint: .cast(movieId: id), decodeToType: MovieCastApiResponseModel.self)
     }
+    
+    func loadAlternativeTitles(for id: Int) async throws -> MovieAlternativeTitlesResponseModel {
+        return try await movieNetworkManager.load(endpoint: .alternativeTitles(movieId: id), decodeToType: MovieAlternativeTitlesResponseModel.self, keyDecodingStrategy: nil)
+    }
 }
