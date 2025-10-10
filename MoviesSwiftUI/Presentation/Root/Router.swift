@@ -53,6 +53,7 @@ enum AppRoute: Hashable {
     case login
     case register
     case userProfile
+    case alternativeTitles(models: [MovieAlternativeTitlesModel])
 
     static func == (lhs: AppRoute, rhs: AppRoute) -> Bool {
         switch (lhs, rhs) {
@@ -90,6 +91,9 @@ enum AppRoute: Hashable {
             hasher.combine(4)
         case .userProfile:
             hasher.combine(5)
+        case let .alternativeTitles(models):
+            hasher.combine(6)
+            hasher.combine(models)
         }
     }
 }

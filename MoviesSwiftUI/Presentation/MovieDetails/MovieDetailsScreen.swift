@@ -31,8 +31,12 @@ struct MovieDetailsScreen: View {
     // MARK: - BODY
     var body: some View {
         Group {
-            if let movieDetails, let movieCast {
-                MovieDetailsView(movie: movieDetails, cast: movieCast.cast)
+            if let movieDetails, let movieCast, let movieAlternativeTitles {
+                MovieDetailsView(
+                    movie: movieDetails,
+                    cast: movieCast.cast,
+                    alternativeTitles: movieAlternativeTitles.titles
+                )
             } else {
                 ProgressView()
             }
@@ -79,7 +83,7 @@ struct MovieDetailsScreen: View {
             }
         }
         .task {
-            if movieDetails == nil, movieCast == nil {
+            if movieDetails == nil, movieCast == nil, movieAlternativeTitles == nil {
                 await loadDetails()
             }
         }

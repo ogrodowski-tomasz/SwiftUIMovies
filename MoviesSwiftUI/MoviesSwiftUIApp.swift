@@ -26,6 +26,7 @@ struct MoviesSwiftUIApp: App {
     init() {
         let httpClient = HTTPClient()
         let movieNetworkManager = MovieNetworkManager(httpClient: httpClient)
+//        let movieNetworkManager = MockMovieNetworkManager()
         movieStore = MovieStore(movieNetworkManager: movieNetworkManager)
         router = Router()
         let authManager = AuthenticationManager()

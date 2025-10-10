@@ -23,6 +23,8 @@ extension View {
                 RegisterScreen()
             case .userProfile:
                 UserProfileScreen()
+            case let .alternativeTitles(models):
+                AlternativeTitlesListView(models: models)
             }
         }
     }

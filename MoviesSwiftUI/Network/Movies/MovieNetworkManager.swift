@@ -31,12 +31,10 @@ struct MovieNetworkManager: MovieNetworkManagerProtocol {
 // MARK: - MOCK MANAGER
 
 struct MockMovieNetworkManager: MovieNetworkManagerProtocol {
-
-    func load<T: Codable>(endpoint: MovieEndpoint, decodeToType type: T.Type) async throws -> T {
+    func load<T>(endpoint: MovieEndpoint, decodeToType type: T.Type, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy?) async throws -> T where T : Decodable, T : Encodable {
         guard let filename = endpoint.stubDataFilename else {
             throw NetworkError.invalidURL
         }
-
-        return try StaticJSONMapper.decode(file: filename, type: T.self)
+        return try StaticJSONMapper.decode(file: filename, type: T.self, keyDecodingStrategy: keyDecodingStrategy)
     }
 }

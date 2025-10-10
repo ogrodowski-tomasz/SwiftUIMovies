@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 struct MovieDetailsView: View {
 
@@ -6,6 +7,13 @@ struct MovieDetailsView: View {
 
     let movie: MovieDetailsApiModel
     let cast: [MovieCastApiModel]
+    let alternativeTitles: [MovieAlternativeTitlesModel]
+    
+    
+    var alternativeTitlesToPresent: [MovieAlternativeTitlesModel] {
+        Array(alternativeTitles.prefix(4))
+    }
+    
     var body: some View {
         List {
             Group {
@@ -25,6 +33,7 @@ struct MovieDetailsView: View {
                     collection
                 }
                 castRow
+                alternativeTitlesRow
                 Spacer()
             }
             .listRowSeparator(.hidden, edges: .all)
@@ -177,6 +186,24 @@ struct MovieDetailsView: View {
 
         }
     }
+    
+    var alternativeTitlesRow: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Alternative titles:")
+                .font(.headline)
+
+            ForEach(alternativeTitlesToPresent) { titleModel in
+                LabeledContent(titleModel.title, value: titleModel.emoji)
+            }
+            if alternativeTitles.count > alternativeTitlesToPresent.count {
+                Button("Show more") {
+                    router.navigate(to: .alternativeTitles(models: alternativeTitles))
+                }
+                .foregroundStyle(.blue)
+                .padding(.top, 5)
+            }
+        }
+    }
 }
 
 
@@ -184,8 +211,9 @@ struct MovieDetailsView: View {
 #Preview {
     NavigationStack {
         MovieDetailsScreen(id: 278)
+            .environment(Router()) // Needed in deeper subview
             .environment(MovieStore(movieNetworkManager: MockMovieNetworkManager()))
-            .environment(Router())
+            .modelContainer(try! ModelContainer(for: FavoriteMovie.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true)))
     }
 }
 
