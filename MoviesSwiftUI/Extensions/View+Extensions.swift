@@ -25,6 +25,8 @@ extension View {
                 UserProfileScreen()
             case let .alternativeTitles(models):
                 AlternativeTitlesListView(models: models)
+            case let .fullCast(model):
+                FullCastListView(cast: model)
             }
         }
     }

@@ -1,65 +1,29 @@
 import Foundation
-
-enum NetworkError: Error {
-    case badRequest
-    case serverError(String)
-    case decodingError(Error)
-    case invalidResponse
-    case invalidURL
-    case httpError(Int)
-}
-
-extension NetworkError: LocalizedError {
-
-    var errorDescription: String? {
-        switch self {
-        case .badRequest:
-            return NSLocalizedString("Unable to perform request", comment: "badRequestError")
-        case .serverError(let errorMessage):
-            return NSLocalizedString(errorMessage, comment: "serverError")
-        case .decodingError:
-            return NSLocalizedString("Unable to decode successfully.", comment: "decodingError")
-        case .invalidResponse:
-            return NSLocalizedString("Invalid response", comment: "invalidResponse")
-        case .invalidURL:
-            return NSLocalizedString("Invalid URL", comment: "invalidURL")
-        case .httpError(_):
-            return NSLocalizedString("Bad request", comment: "badRequest")
-        }
-    }
-
-}
-
-enum HTTPMethod {
-    case get([URLQueryItem])
-    case post(Data?)
-    case delete
-
-    var name: String {
-        switch self {
-        case .get:
-            return "GET"
-        case .post:
-            return "POST"
-        case .delete:
-            return "DELETE"
-        }
-    }
-}
-
-struct Resource<T: Codable> {
-    let url: URL
-    var method: HTTPMethod = .get([])
-    var modelType: T.Type
-}
+import SwiftUI
 
 protocol HTTPClientProtocol {
     func load<T: Codable>(_ resource: Resource<T>, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy?) async throws -> T
 }
 
 extension HTTPClientProtocol {
-    func load<T: Codable>(_ resource: Resource<T>, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = nil) async throws -> T {
+    func load<T: Codable>(_ resource: Resource<T>, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = .convertFromSnakeCase) async throws -> T {
         try await load(resource, keyDecodingStrategy: keyDecodingStrategy)
+    }
+    
+    func load<T: Codable>(_ endpoint: MovieEndpoint, modelType: T.Type, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = .convertFromSnakeCase) async throws -> T {
+        let resource = try Resource(endpoint: endpoint, modelType: modelType)
+        return try await load(resource, keyDecodingStrategy: keyDecodingStrategy)
+    }
+}
+
+private struct HTTPClientKey: EnvironmentKey {
+    static var defaultValue: HTTPClientProtocol = HTTPClient()
+}
+
+extension EnvironmentValues {
+    var httpClient: HTTPClientProtocol {
+        get { self[HTTPClientKey.self] }
+        set { self[HTTPClientKey.self] = newValue }
     }
 }
 
@@ -107,11 +71,11 @@ struct HTTPClient: HTTPClientProtocol {
         }
 
         do {
-            let jsonObject = try JSONSerialization.jsonObject(with: data)
-            let prettyData = try JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted)
-            let prettyString = String(data: prettyData, encoding: .utf8) ?? ""
-            
-            print("DEBUG: JSON for url \(resource.url): \(prettyString)")
+//            let jsonObject = try JSONSerialization.jsonObject(with: data)
+//            let prettyData = try JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted)
+//            let prettyString = String(data: prettyData, encoding: .utf8) ?? ""
+//            
+//            print("DEBUG: JSON for url \(resource.url): \(prettyString)")
             
             let decoder = JSONDecoder()
             if let keyDecodingStrategy {
@@ -124,5 +88,15 @@ struct HTTPClient: HTTPClientProtocol {
         }
     }
 
+}
+
+struct MockHTTPClient: HTTPClientProtocol {
+    
+    func load<T>(_ resource: Resource<T>, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy?) async throws -> T where T : Decodable, T : Encodable {
+        guard let filename = resource.stubFileName else {
+            throw NetworkError.invalidURL
+        }
+        return try StaticJSONMapper.decode(file: filename, type: T.self, keyDecodingStrategy: keyDecodingStrategy)
+    }
 }
 

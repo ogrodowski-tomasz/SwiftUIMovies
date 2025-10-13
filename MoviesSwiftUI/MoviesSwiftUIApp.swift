@@ -17,17 +17,12 @@ struct MoviesSwiftUIApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     @State private var currentUserStore: CurrentUserStore
-    @State private var movieStore: MovieStore
     @State private var router: Router
 
     @State private var showError: Bool = false
     @State private var errorWrapper: ErrorWrapper?
 
     init() {
-        let httpClient = HTTPClient()
-        let movieNetworkManager = MovieNetworkManager(httpClient: httpClient)
-//        let movieNetworkManager = MockMovieNetworkManager()
-        movieStore = MovieStore(movieNetworkManager: movieNetworkManager)
         router = Router()
         let authManager = AuthenticationManager()
         let firestoreManager = FirestoreManager()
@@ -50,9 +45,9 @@ struct MoviesSwiftUIApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
-                .environment(movieStore)
                 .environment(router)
                 .environment(currentUserStore)
+                .environment(\.httpClient, HTTPClient())
                 .environment(\.showError, ShowErrorAction(action: showError))
                 .alert("Error occured!", isPresented: $showError, actions: {
                     if let retryAction = errorWrapper?.retryAction {

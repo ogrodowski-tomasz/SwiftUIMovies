@@ -1,29 +1,30 @@
 import SwiftUI
 
+#warning("Create another initializer for MovieCast model")
 struct CastCardView: View {
-    let castMember: MovieCastApiModel
+    let imagePath: String?
+    let title: String
+    let subtitle: String?
 
     var body: some View {
         HStack {
-            AsyncImage(url: URL(imagePath: castMember.profilePath)) { phase in
+            AsyncImage(url: URL(imagePath: imagePath)) { phase in
                 switch phase {
-                case .empty:
-                    ProgressView()
                 case .success(let image):
                     image
                         .resizable()
-                        .frame(width: 50, height: 75)
-                        .cornerRadius(5)
-                case .failure(let error):
-                    Text("error \(error.localizedDescription)")
-                @unknown default:
-                    Text("unknown default")
+                default:
+                    Rectangle()
+                        .foregroundStyle(.gray)
                 }
             }
+            .frame(width: 50, height: 75)
+            .cornerRadius(5)
+
             VStack(alignment: .leading, spacing: 5) {
-                Text(castMember.name)
+                Text(title)
                     .font(.headline)
-                Text(castMember.character ?? "Unknown")
+                Text(subtitle ?? "Unknown")
                     .font(.caption)
                     .fontWeight(.thin)
             }
@@ -37,7 +38,8 @@ struct CastCardView: View {
 struct CastCardView_Previews: PreviewProvider {
 
     static var previews: some View {
-        CastCardView(castMember: castMember())
+        let member = castMember()
+        return CastCardView(imagePath: member.profilePath, title: member.name, subtitle: member.character)
     }
 
     static func castMember() -> MovieCastApiModel {

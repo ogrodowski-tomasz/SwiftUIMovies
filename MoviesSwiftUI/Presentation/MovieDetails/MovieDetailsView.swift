@@ -2,11 +2,11 @@ import SwiftUI
 import SwiftData
 
 struct MovieDetailsView: View {
-
+    
     @Environment(Router.self) var router
-
+    
     let movie: MovieDetailsApiModel
-    let cast: [MovieCastApiModel]
+    let cast: MovieCastApiResponseModel
     let alternativeTitles: [MovieAlternativeTitlesModel]
     
     
@@ -44,7 +44,7 @@ struct MovieDetailsView: View {
         .scrollIndicators(.hidden)
         .inlineNavigationTitle(movie.title)
     }
-
+    
     var poster: some View {
         AsyncImage(url: URL(imagePath: movie.posterPath)) { phase in
             switch phase {
@@ -63,33 +63,33 @@ struct MovieDetailsView: View {
             }
         }
     }
-
+    
     var title: some View {
         Text(movie.title)
             .font(.title)
             .fontWeight(.bold)
     }
-
+    
     var originalTitle: some View {
         Text(movie.originalTitle ?? "-")
             .font(.caption)
             .fontWeight(.thin)
     }
-
+    
     var releaseDate: some View {
         Text("Release date: " + (movie.releaseDate ?? "-"))
             .font(.caption)
     }
-
+    
     var runtime: some View {
         Text("Runtime: " + "\(movie.runtime ?? 0)min")
             .font(.caption)
     }
-
+    
     var rating: some View {
         Text("⭐️ \((movie.voteAverage ?? 0).formatted(.number))")
     }
-
+    
     var genres: some View {
         VStack(alignment: .leading, spacing: 5) {
             ScrollView(.horizontal, showsIndicators: false) {
@@ -110,25 +110,25 @@ struct MovieDetailsView: View {
         }
         .frame(maxHeight: 70)
     }
-
+    
     var overview: some View {
         VStack(alignment: .leading, spacing: 5, content: {
             Text("Plot:")
                 .font(.headline)
             Text(movie.overview ?? "")
-
+            
             if let tagline = movie.tagline {
                 Text("\"\(tagline)\"")
                     .italic()
                     .padding(.top, 10)
             }
         })
-            .font(.caption)
-            .padding()
-            .background(.gray.opacity(0.5))
-            .cornerRadius(10)
+        .font(.caption)
+        .padding()
+        .background(.gray.opacity(0.5))
+        .cornerRadius(10)
     }
-
+    
     var collection: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Collection: [\(movie.belongsToCollection?.id ?? -1)]")
@@ -146,7 +146,7 @@ struct MovieDetailsView: View {
                         case .success(let image):
                             image
                                 .resizable()
-    //                            .frame(width: 50, height: 75)
+                            //                            .frame(width: 50, height: 75)
                                 .scaledToFit()
                                 .frame(maxWidth: .infinity)
                                 .cornerRadius(5)
@@ -161,29 +161,29 @@ struct MovieDetailsView: View {
                         .fontWeight(.bold)
                         .padding()
                         .background(RoundedRectangle(cornerRadius: 5).fill(Color.white.opacity(0.85)))
-
+                    
                 }
             }
             .buttonStyle(.borderless)
         }
     }
-
+    
     var castRow: some View {
         VStack(alignment: .leading, spacing: 5) {
-
+            
             Text("Cast:")
                 .font(.headline)
-            ForEach(cast.prefix(5)) { castMember in
-                CastCardView(castMember: castMember)
+            ForEach(cast.cast.prefix(5)) { castMember in
+                CastCardView(imagePath: castMember.profilePath, title: castMember.name, subtitle: castMember.character)
             }
-
-                Button("See more >") {
-                    print("TAPPED")
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(.blue)
-                .padding(.top)
-
+            
+            Button("See more >") {
+                router.navigate(to: .fullCast(model: cast))
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(.blue)
+            .padding(.top)
+            
         }
     }
     
@@ -191,7 +191,7 @@ struct MovieDetailsView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Alternative titles:")
                 .font(.headline)
-
+            
             ForEach(alternativeTitlesToPresent) { titleModel in
                 LabeledContent(titleModel.title, value: titleModel.emoji)
             }
@@ -212,7 +212,6 @@ struct MovieDetailsView: View {
     NavigationStack {
         MovieDetailsScreen(id: 278)
             .environment(Router()) // Needed in deeper subview
-            .environment(MovieStore(movieNetworkManager: MockMovieNetworkManager()))
             .modelContainer(try! ModelContainer(for: FavoriteMovie.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true)))
     }
 }

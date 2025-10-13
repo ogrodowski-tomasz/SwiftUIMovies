@@ -82,7 +82,6 @@ struct CollectionDetailsView: View {
                 movieNetworkManager: MockMovieNetworkManager()
             )
         )
-        .environment(MovieStore(movieNetworkManager: MockMovieNetworkManager()))
         .environment(Router())
 
     }

@@ -8,7 +8,7 @@ struct MovieDetailsScreen: View {
     @Environment(\.modelContext) private var context
     
     @Environment(Router.self) private var router
-    @Environment(MovieStore.self) var movieStore
+    @Environment(\.httpClient) var httpClient
     
     // MARK: - STATE
     @State private var movieDetails: MovieDetailsApiModel? = nil
@@ -34,7 +34,7 @@ struct MovieDetailsScreen: View {
             if let movieDetails, let movieCast, let movieAlternativeTitles {
                 MovieDetailsView(
                     movie: movieDetails,
-                    cast: movieCast.cast,
+                    cast: movieCast,
                     alternativeTitles: movieAlternativeTitles.titles
                 )
             } else {
@@ -95,9 +95,13 @@ struct MovieDetailsScreen: View {
     
     private func loadDetails() async {
         do {
-            async let fetchedDetails = movieStore.loadDetails(for: id)
-            async let fetchedCast = movieStore.loadCast(for: id)
-            async let fetchedAlternativeTitles = movieStore.loadAlternativeTitles(for: id)
+            let detailsResource = try Resource(endpoint: .movieDetails(id: id), modelType: MovieDetailsApiModel.self)
+            let castResource = try Resource(endpoint: .cast(movieId: id), modelType: MovieCastApiResponseModel.self)
+            let alternativeTitlesResource = try Resource(endpoint: .alternativeTitles(movieId: id), modelType: MovieAlternativeTitlesResponseModel.self)
+
+            async let fetchedDetails = httpClient.load(detailsResource)
+            async let fetchedCast = httpClient.load(castResource)
+            async let fetchedAlternativeTitles = httpClient.load(alternativeTitlesResource, keyDecodingStrategy: nil)
             movieDetails = try await fetchedDetails
             movieCast = try await fetchedCast
             movieAlternativeTitles = try await fetchedAlternativeTitles
@@ -142,7 +146,7 @@ struct MovieDetailsScreen: View {
     NavigationStack {
         MovieDetailsScreen(id: 278)
             .environment(Router()) // Needed in deeper subview
-            .environment(MovieStore(movieNetworkManager: MockMovieNetworkManager()))
+            .environment(\.httpClient, MockHTTPClient())
             .modelContainer(try! ModelContainer(for: FavoriteMovie.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true)))
     }
 }
