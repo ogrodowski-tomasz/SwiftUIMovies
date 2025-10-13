@@ -9,7 +9,7 @@ struct MoviesNavigationStack: View {
 
         NavigationStack(path: $router.movieTabRoutes) {
             Group {
-                MovieListScreen()
+                MainListScreen()
             }
             .appRouteDestinations()
         }

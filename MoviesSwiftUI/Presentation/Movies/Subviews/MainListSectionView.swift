@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct MovieListView: View {
+struct MainListSectionView: View {
 
     // MARK: - ENVIRONMENT
     @Environment(Router.self) var router
@@ -9,11 +9,13 @@ struct MovieListView: View {
     let movies: [any MovieListRepresentable]
     let reviews: [ReviewModel]?
     let sectionTitle: String?
+    let showMoreButton: Bool
 
-    init( movies: [any MovieListRepresentable], reviews: [ReviewModel]? = nil, sectionTitle: String? = nil) {
+    init(movies: [any MovieListRepresentable], reviews: [ReviewModel]? = nil, sectionTitle: String? = nil, showMoreButton: Bool) {
         self.movies = movies
         self.reviews = reviews
         self.sectionTitle = sectionTitle
+        self.showMoreButton = showMoreButton
     }
 
     // MARK: - BODY
@@ -26,6 +28,9 @@ struct MovieListView: View {
                     MovieCardView(movie: movie, review: reviewFor(movie))
                 }
                 .tint(.black)
+            }
+            if showMoreButton {
+                Button("Show more") { }
             }
         } header: {
             if let sectionTitle {
@@ -42,9 +47,9 @@ struct MovieListView: View {
 // MARK: - PREVIEW
 #Preview {
     List {
-        MovieListView(
+        MainListSectionView(
             movies: try! StaticJSONMapper.decode(file: MovieEndpoint.topRated.stubDataFilename!, type: MovieApiResponseModel.self).results,
-            sectionTitle: "Movie list")
+            sectionTitle: "Movie list", showMoreButton: true)
             .environment(Router())
 
     }

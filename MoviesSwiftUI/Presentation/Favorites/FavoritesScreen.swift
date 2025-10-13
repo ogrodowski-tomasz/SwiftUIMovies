@@ -43,7 +43,7 @@ struct FavoritesScreen: View {
                 }
             } else {
                 List {
-                    MovieListView(movies: favorites, reviews: reviews)
+                    MainListSectionView(movies: favorites, reviews: reviews, showMoreButton: false)
                 }
             }
         }
@@ -80,7 +80,13 @@ struct FavoritesScreen: View {
 #Preview {
     NavigationStack {
         FavoritesScreen()
-            .modelContainer(try! ModelContainer(for: FavoriteMovie.self, ReviewModel.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true)))
+            .modelContainer(
+                try! ModelContainer(
+                    for: FavoriteMovie.self,
+                    ReviewModel.self,
+                    configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+                )
+            )
             .environment(Router())
     }
 }
