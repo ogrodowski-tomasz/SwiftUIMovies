@@ -27,6 +27,8 @@ extension View {
                 AlternativeTitlesListView(models: models)
             case let .fullCast(model):
                 FullCastListView(cast: model)
+            case let .moreMovies(initial, listType):
+                MovieListScreen(initial: initial, movieListType: listType)
             }
         }
     }

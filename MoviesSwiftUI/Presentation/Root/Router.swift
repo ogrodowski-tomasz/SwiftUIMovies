@@ -55,6 +55,8 @@ enum AppRoute: Hashable {
     case userProfile
     case alternativeTitles(models: [MovieAlternativeTitlesModel])
     case fullCast(model: MovieCastApiResponseModel)
+    case moreMovies(initial: [MovieApiModel], listType: MovieListScreen.MovieListType)
+    
 
     static func == (lhs: AppRoute, rhs: AppRoute) -> Bool {
         switch (lhs, rhs) {
@@ -72,6 +74,8 @@ enum AppRoute: Hashable {
             return true
         case let (.fullCast(lhsCast), .fullCast(rhsCast)):
             return lhsCast.id == rhsCast.id
+        case let (.moreMovies(lhsInitial, lhsType), .moreMovies(rhsInitial, rhsType)):
+            return lhsInitial == rhsInitial && lhsType == rhsType
         default:
             return false
         }
@@ -100,6 +104,9 @@ enum AppRoute: Hashable {
         case let .fullCast(model):
             hasher.combine(7)
             hasher.combine(model.id)
+        case let .moreMovies(initial, _):
+            hasher.combine(8)
+            hasher.combine(initial)
         }
     }
 }

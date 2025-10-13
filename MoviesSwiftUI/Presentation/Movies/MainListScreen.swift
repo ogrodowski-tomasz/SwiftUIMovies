@@ -53,14 +53,51 @@ struct MainListScreen: View {
     // MARK: - BODY
     var body: some View {
         List {
-            if let nowPlaying = state.nowPlayingToPresent {
-                MainListSectionView(movies: nowPlaying, sectionTitle: "Now playing", showMoreButton: state.canNowPlayingShowMore)
+            if let nowPlayingToPresent = state.nowPlayingToPresent {
+                MainListSectionView(
+                    movies: nowPlayingToPresent,
+                    sectionTitle: "Now playing",
+                    showMoreButton: state.canNowPlayingShowMore,
+                    onShowMoreTapped: {
+                        let allMovies: [MovieApiModel] = state.nowPlaying ?? nowPlayingToPresent
+                        router.navigate(
+                            to: .moreMovies(
+                                initial: allMovies,
+                                listType: .nowPlaying
+                            )
+                        )
+                    }
+                )
             }
-            if let topRated = state.topRatedToPresent {
-                MainListSectionView(movies: topRated, sectionTitle: "Top Rated", showMoreButton: state.canTopRatedShowMore)
+            if let topRatedToPresent = state.topRatedToPresent {
+                MainListSectionView(
+                    movies: topRatedToPresent,
+                    sectionTitle: "Top Rated",
+                    showMoreButton: state.canTopRatedShowMore,
+                    onShowMoreTapped: {
+                    let allMovies: [MovieApiModel] = state.topRated ?? topRatedToPresent
+                        router.navigate(
+                            to: .moreMovies(
+                                initial: allMovies,
+                                listType: .topRated
+                            )
+                        )
+                })
             }
-            if let popular = state.popularToPresent {
-                MainListSectionView(movies: popular, sectionTitle: "Popular", showMoreButton: state.canPopularShowMore)
+            if let popularToPresent = state.popularToPresent {
+                MainListSectionView(
+                    movies: popularToPresent,
+                    sectionTitle: "Popular",
+                    showMoreButton: state.canPopularShowMore,
+                    onShowMoreTapped: {
+                    let allMovies: [MovieApiModel] = state.popular ?? popularToPresent
+                        router.navigate(
+                            to: .moreMovies(
+                                initial: allMovies,
+                                listType: .popular
+                            )
+                        )
+                })
             }
         }
         .inlineNavigationTitle("Movie List")
@@ -81,9 +118,9 @@ struct MainListScreen: View {
     /// When error is catched user is let to retry this method.
     private func loadData() async {
         do {
-            async let fetchedPopular = httpClient.load(.popular, modelType: MovieApiResponseModel.self)
-            async let fetchedTopRated = httpClient.load(.topRated, modelType: MovieApiResponseModel.self)
-            async let fetchedNowPlaying = httpClient.load(.nowPlaying, modelType: MovieApiResponseModel.self)
+            async let fetchedPopular = httpClient.load(.popular(page: 1), modelType: MovieApiResponseModel.self)
+            async let fetchedTopRated = httpClient.load(.topRated(page: 1), modelType: MovieApiResponseModel.self)
+            async let fetchedNowPlaying = httpClient.load(.nowPlaying(page: 1), modelType: MovieApiResponseModel.self)
             let fetchedData = try await (fetchedTopRated, fetchedPopular, fetchedNowPlaying)
             self.state.topRated = fetchedData.0.results
             self.state.popular = fetchedData.1.results
