@@ -41,7 +41,6 @@ struct CollectionDetailsScreen: View {
                 movieNetworkManager: MockMovieNetworkManager()
             )
         )
-        .environment(MovieStore(movieNetworkManager: MockMovieNetworkManager()))
         .environment(Router())
     }
 }

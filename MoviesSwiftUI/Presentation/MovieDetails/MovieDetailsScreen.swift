@@ -2,36 +2,41 @@ import SwiftData
 import SwiftUI
 
 struct MovieDetailsScreen: View {
-
+    
     // MARK: - ENVIRONMENT
     @Environment(\.showError) private var showError
     @Environment(\.modelContext) private var context
-
+    
     @Environment(Router.self) private var router
-    @Environment(MovieStore.self) var movieStore
-
+    @Environment(\.httpClient) var httpClient
+    
     // MARK: - STATE
     @State private var movieDetails: MovieDetailsApiModel? = nil
     @State private var movieCast: MovieCastApiResponseModel? = nil
-
+    @State private var movieAlternativeTitles: MovieAlternativeTitlesResponseModel? = nil
+    
     // MARK: - QUERY
     @Query private var favorites: [FavoriteMovie]
     @Query private var reviews: [ReviewModel]
-
+    
     // MARK: - PROPERTIES
     let id: Int
-
+    
     // MARK: - INITIALIZER
     init(id: Int) {
         self.id = id
         _reviews = Query(filter: #Predicate<ReviewModel> { $0.id == id })
     }
-
+    
     // MARK: - BODY
     var body: some View {
         Group {
-            if let movieDetails, let movieCast {
-                MovieDetailsView(movie: movieDetails, cast: movieCast.cast)
+            if let movieDetails, let movieCast, let movieAlternativeTitles {
+                MovieDetailsView(
+                    movie: movieDetails,
+                    cast: movieCast,
+                    alternativeTitles: movieAlternativeTitles.titles
+                )
             } else {
                 ProgressView()
             }
@@ -46,7 +51,7 @@ struct MovieDetailsScreen: View {
                     .tint(.red)
                 }
             }
-
+            
             ToolbarItem(placement: .bottomBar) {
                 Button {
                     guard let movieDetails = movieDetails else { return }
@@ -55,16 +60,16 @@ struct MovieDetailsScreen: View {
                     if let review = reviews.first, let rating = review.rating {
                         HStack(spacing: 10) {
                             Text("You've rated this movie:")
-                            .opacity(0.75)
+                                .opacity(0.75)
                             Text("\(rating)/10")
-                            .bold()
+                                .bold()
                             
                             
                             Image(systemName: "pencil")
                                 .foregroundStyle(.blue)
                         }
                         .foregroundStyle(.black)
-.font(.headline)
+                        .font(.headline)
                         .padding()
                         .frame(maxWidth: .infinity, alignment: .leading)
                     } else {
@@ -78,22 +83,28 @@ struct MovieDetailsScreen: View {
             }
         }
         .task {
-            if movieDetails == nil, movieCast == nil {
+            if movieDetails == nil, movieCast == nil, movieAlternativeTitles == nil {
                 await loadDetails()
             }
         }
     }
-
+    
     // MARK: - VIEW COMPONENTS
-
+    
     // MARK: - PRIVATE METHODS
-
+    
     private func loadDetails() async {
         do {
-            let fetchedDetails = try await movieStore.loadDetails(for: id)
-            let fetchedCast = try await movieStore.loadCast(for: fetchedDetails.id)
-            movieDetails = fetchedDetails
-            movieCast = fetchedCast
+            let detailsResource = try Resource(endpoint: .movieDetails(id: id), modelType: MovieDetailsApiModel.self)
+            let castResource = try Resource(endpoint: .cast(movieId: id), modelType: MovieCastApiResponseModel.self)
+            let alternativeTitlesResource = try Resource(endpoint: .alternativeTitles(movieId: id), modelType: MovieAlternativeTitlesResponseModel.self)
+
+            async let fetchedDetails = httpClient.load(detailsResource)
+            async let fetchedCast = httpClient.load(castResource)
+            async let fetchedAlternativeTitles = httpClient.load(alternativeTitlesResource, keyDecodingStrategy: nil)
+            movieDetails = try await fetchedDetails
+            movieCast = try await fetchedCast
+            movieAlternativeTitles = try await fetchedAlternativeTitles
         } catch {
             showError(error, "Try again later.") {
                 Task {
@@ -102,12 +113,12 @@ struct MovieDetailsScreen: View {
             }
         }
     }
-
+    
     private func isFavorite(_ movieId: Int) -> Bool {
         guard !favorites.isEmpty else { return false }
         return favorites.contains(where: { $0.id == movieId })
     }
-
+    
     private func toggleFavorite(_ movieId: Int) {
         guard let movieDetails else { return }
         if let favorite = favorites.first(where: { $0.id == movieId }) {
@@ -118,7 +129,7 @@ struct MovieDetailsScreen: View {
         }
         saveContext()
     }
-
+    
     private func saveContext() {
         do {
             try context.save()
@@ -128,14 +139,14 @@ struct MovieDetailsScreen: View {
             }
         }
     }
-
+    
 }
 
 #Preview {
     NavigationStack {
         MovieDetailsScreen(id: 278)
             .environment(Router()) // Needed in deeper subview
-            .environment(MovieStore(movieNetworkManager: MockMovieNetworkManager()))
+            .environment(\.httpClient, MockHTTPClient())
             .modelContainer(try! ModelContainer(for: FavoriteMovie.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true)))
     }
 }

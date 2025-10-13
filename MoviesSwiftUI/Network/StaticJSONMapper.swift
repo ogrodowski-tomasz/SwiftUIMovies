@@ -2,7 +2,7 @@ import Foundation
 
 struct StaticJSONMapper {
 
-    static func decode<T: Decodable>(file: String, type: T.Type, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy = .convertFromSnakeCase) throws -> T {
+    static func decode<T: Decodable>(file: String, type: T.Type, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = .convertFromSnakeCase) throws -> T {
 
         guard !file.isEmpty,
               let path = Bundle.main.path(forResource: file, ofType: "json"),
@@ -11,7 +11,9 @@ struct StaticJSONMapper {
         }
 
         let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = keyDecodingStrategy
+        if let keyDecodingStrategy {
+            decoder.keyDecodingStrategy = keyDecodingStrategy
+        }
         return try decoder.decode(T.self, from: data)
     }
 }

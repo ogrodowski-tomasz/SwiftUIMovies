@@ -1,39 +1,24 @@
-//
-//
-// MoviesSwiftUITests.swift
-// MoviesSwiftUITests
-//
-// Created by Tomasz Ogrodowski on 17/03/2025
-// Copyright © 2025 Tomasz Ogrodowski. All rights reserved.
-//
-        
-
 import XCTest
 @testable import MoviesSwiftUI
 
 final class MoviesSwiftUITests: XCTestCase {
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
+    func test_mergedById() {
+        let stanLeeId: Int = 7624
+        let stubCast: [MovieCastApiModel] = [
+            .init(adult: false, id: stanLeeId, name: "Stan Lee", profilePath: "/kKeyWoFtTqOPsbmwylNHmuB3En9.jpg", character: "Driver", knownForDepartment: "Writing", popularity: 0.035, job: "Characters"),
+            .init(adult: false, id: stanLeeId, name: "Stan Lee", profilePath: "/kKeyWoFtTqOPsbmwylNHmuB3En9.jpg", character: "Driver", knownForDepartment: "Writing", popularity: 0.035, job: "Executive Producer"),
+            .init(adult: false, id: stanLeeId, name: "Stan Lee", profilePath: "/kKeyWoFtTqOPsbmwylNHmuB3En9.jpg", character: "Driver", knownForDepartment: "Writing", popularity: 0.035, job: "In Memory Of"),
+            .init(adult: false, id: 19272, name: "Joe Russo", profilePath: "/o0OXjFzL10jCy89iAs7UzzSbyoK.jpg", character: nil, knownForDepartment: "Production", popularity: 0.013, job: "Director"),
+            .init(adult: false, id: 19271, name: "Anthony Russo", profilePath: "/xbINBnWn28YygYWUJ1aSAw0xPRv.jpg", character: nil, knownForDepartment: "Directing", popularity: 0.016, job: "Director")
+        ]
+        
+        let result = stubCast.mergedById()
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        XCTAssertEqual(result.count, 3)
+        let filtered = result.filter { $0.id == stanLeeId }
+        XCTAssertEqual(filtered.count, 1, "There should be only one Stan Lee in array")
+        let stanLee = result.first(where: { $0.id == stanLeeId })
+        XCTAssertEqual(stanLee?.job, "Characters / Executive Producer / In Memory Of")
     }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
-    }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
-    }
-
 }

@@ -5,19 +5,23 @@ struct MovieListScreen: View {
 
     // MARK: - ENVIRONMENT
     @Environment(\.showError) private var showError
-    @Environment(MovieStore.self) var movieStore
     @Environment(Router.self) var router
+    @Environment(\.httpClient) var httpClient
+    
+    @State private var topRated: [MovieApiModel]? = nil
+    @State private var popular: [MovieApiModel]? = nil
+    @State private var nowPlaying: [MovieApiModel]? = nil
 
     // MARK: - BODY
     var body: some View {
         List {
-            if let nowPlaying = movieStore.nowPlaying {
+            if let nowPlaying = nowPlaying {
                 MovieListView(movies: nowPlaying, sectionTitle: "Now playing")
             }
-            if let topRated = movieStore.topRated {
+            if let topRated = topRated {
                 MovieListView(movies: topRated, sectionTitle: "Top Rated")
             }
-            if let popular = movieStore.popular {
+            if let popular = popular {
                 MovieListView(movies: popular, sectionTitle: "Popular")
             }
         }
@@ -39,10 +43,13 @@ struct MovieListScreen: View {
     /// When error is catched user is let to retry this method.
     private func loadData() async {
         do {
-            async let topRated: () = movieStore.loadTopRatedMovies()
-            async let popular: () = movieStore.loadPopularMovies()
-            async let nowPlaying: () = movieStore.loadNowPlayingMovies()
-            _ = try await (topRated, popular, nowPlaying)
+            async let fetchedPopular = httpClient.load(.popular, modelType: MovieApiResponseModel.self)
+            async let fetchedTopRated = httpClient.load(.topRated, modelType: MovieApiResponseModel.self)
+            async let fetchedNowPlaying = httpClient.load(.nowPlaying, modelType: MovieApiResponseModel.self)
+            let fetchedData = try await (fetchedTopRated, fetchedPopular, fetchedNowPlaying)
+            self.topRated = Array(fetchedData.0.results.prefix(5))
+            self.popular = Array(fetchedData.1.results.prefix(5))
+            self.nowPlaying = Array(fetchedData.2.results.prefix(5))
         } catch {
             showError(error, "Failed to load movies") {
                 Task {
@@ -58,7 +65,7 @@ struct MovieListScreen: View {
 #Preview {
     NavigationStack {
         MovieListScreen()
-            .environment(MovieStore(movieNetworkManager: MockMovieNetworkManager()))
             .environment(Router())
+            .environment(\.httpClient, MockHTTPClient())
     }
 }

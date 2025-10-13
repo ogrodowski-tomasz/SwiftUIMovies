@@ -18,7 +18,7 @@ enum AppTab: Hashable, Identifiable, CaseIterable {
     var label: some View {
         switch self {
         case .movies:
-            Label("Movies", systemImage: "tree")
+            Label("Movies", systemImage: "camera")
         case .favorites:
             Label("Favorites", systemImage: "heart.fill")
         case .search:
@@ -53,6 +53,8 @@ enum AppRoute: Hashable {
     case login
     case register
     case userProfile
+    case alternativeTitles(models: [MovieAlternativeTitlesModel])
+    case fullCast(model: MovieCastApiResponseModel)
 
     static func == (lhs: AppRoute, rhs: AppRoute) -> Bool {
         switch (lhs, rhs) {
@@ -68,6 +70,8 @@ enum AppRoute: Hashable {
             return true
         case (.userProfile, .userProfile):
             return true
+        case let (.fullCast(lhsCast), .fullCast(rhsCast)):
+            return lhsCast.id == rhsCast.id
         default:
             return false
         }
@@ -90,6 +94,12 @@ enum AppRoute: Hashable {
             hasher.combine(4)
         case .userProfile:
             hasher.combine(5)
+        case let .alternativeTitles(models):
+            hasher.combine(6)
+            hasher.combine(models)
+        case let .fullCast(model):
+            hasher.combine(7)
+            hasher.combine(model.id)
         }
     }
 }

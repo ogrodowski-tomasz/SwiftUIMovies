@@ -12,6 +12,8 @@ enum MovieEndpoint {
     case movieDetails(id: Int)
     case cast(movieId: Int)
     case collectionDetails(collectionID: Int)
+    case alternativeTitles(movieId: Int)
+    case personDetails(personId: Int)
 }
 
 extension MovieEndpoint: AppEndpoint {
@@ -42,6 +44,10 @@ extension MovieEndpoint: AppEndpoint {
             return "/3/movie/\(movieId)/credits"
         case let .collectionDetails(collectionID):
             return "/3/collection/\(collectionID)"
+        case let .alternativeTitles(movieId):
+            return "/3/movie/\(movieId)/alternative_titles"
+        case let .personDetails(personId):
+            return "/3/person/\(personId)"
         }
     }
 
@@ -59,6 +65,10 @@ extension MovieEndpoint: AppEndpoint {
             return "CastStubData"
         case .collectionDetails:
             return "CollectionDetailsStubData"
+        case .alternativeTitles:
+            return "MovieDetailsAlternativeTitles"
+        case .personDetails:
+            return "PersonDetailsStubData"
         }
     }
 
@@ -69,7 +79,7 @@ extension MovieEndpoint: AppEndpoint {
                 URLQueryItem(name: "language", value: "en-US"),
                 URLQueryItem(name: "page", value: "1"),
             ]
-        case .cast, .collectionDetails:
+        case .cast, .collectionDetails, .alternativeTitles, .personDetails:
             return nil
         }
     }
