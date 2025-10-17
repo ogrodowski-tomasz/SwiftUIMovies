@@ -10,13 +10,6 @@ struct MovieDetailsView: View {
     let cast: MovieCastApiResponseModel
     let alternativeTitles: [MovieAlternativeTitlesModel]
     
-    // Query for watchlist movie with predicate based on current movie ID
-    @Query private var watchlistMovies: [WatchlistMovieModel]
-    
-    // Computed property to check if current movie is in watchlist
-    private var isInWatchlist: Bool {
-        watchlistMovies.contains { $0.id == movie.id }
-    }
     
     
     var alternativeTitlesToPresent: [MovieAlternativeTitlesModel] {
@@ -35,7 +28,6 @@ struct MovieDetailsView: View {
                         runtime
                         rating
                         genres
-                        actionButtons
                     }
                 }
                 overview
@@ -121,67 +113,6 @@ struct MovieDetailsView: View {
         .frame(maxHeight: 70)
     }
     
-    var actionButtons: some View {
-        HStack(spacing: 12) {
-            // Watchlist button
-            Button {
-                toggleWatchlist()
-            } label: {
-                HStack(spacing: 4) {
-                    Image(systemName: isInWatchlist ? "bookmark.fill" : "bookmark")
-                    Text(isInWatchlist ? "In Watchlist" : "Add to Watchlist")
-                        .font(.caption)
-                }
-                .foregroundColor(isInWatchlist ? .blue : .primary)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(isInWatchlist ? Color.blue.opacity(0.1) : Color.gray.opacity(0.1))
-                )
-            }
-            .buttonStyle(.plain)
-            
-            Spacer()
-        }
-        .padding(.top, 8)
-    }
-    
-    private func toggleWatchlist() {
-        if isInWatchlist {
-            removeFromWatchlist()
-        } else {
-            addToWatchlist()
-        }
-    }
-    
-    private func addToWatchlist() {
-        let watchlistMovie = WatchlistMovieModel(
-            id: movie.id,
-            title: movie.title,
-            posterPath: movie.posterPath,
-            releaseDate: movie.releaseDate,
-            voteAverage: movie.voteAverage
-        )
-        
-        modelContext.insert(watchlistMovie)
-        save()
-    }
-    
-    private func removeFromWatchlist() {
-        if let watchlistMovie = watchlistMovies.first(where: { $0.id == movie.id }) {
-            modelContext.delete(watchlistMovie)
-            save()
-        }
-    }
-    
-    private func save() {
-        do {
-            try modelContext.save()
-        } catch {
-            // Handle error if needed
-        }
-    }
     
     var overview: some View {
         VStack(alignment: .leading, spacing: 5, content: {
@@ -284,7 +215,7 @@ struct MovieDetailsView: View {
     NavigationStack {
         MovieDetailsScreen(id: 278)
             .environment(Router()) // Needed in deeper subview
-            .modelContainer(try! ModelContainer(for: FavoriteMovie.self, WatchlistMovieModel.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true)))
+            .modelContainer(try! ModelContainer(for: FavoriteMovie.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true)))
     }
 }
 

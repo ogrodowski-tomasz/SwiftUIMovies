@@ -18,6 +18,7 @@ struct MovieDetailsScreen: View {
     // MARK: - QUERY
     @Query private var favorites: [FavoriteMovie]
     @Query private var reviews: [ReviewModel]
+    @Query private var watchlist: [WatchlistMovieModel]
     
     // MARK: - PROPERTIES
     let id: Int
@@ -44,11 +45,23 @@ struct MovieDetailsScreen: View {
         .toolbar {
             if let movieDetails {
                 ToolbarItem(placement: .topBarTrailing) {
-                    let isFavorite = isFavorite(movieDetails.id)
-                    Button("Add to favorites", systemImage: isFavorite ? "heart.fill" : "heart") {
-                        toggleFavorite(movieDetails.id)
+                    HStack(spacing: 12) {
+                        // Watchlist button
+                        let isInWatchlist = watchlist.contains { $0.id == movieDetails.id }
+                        Button {
+                            toggleWatchlist(movieDetails)
+                        } label: {
+                            Image(systemName: isInWatchlist ? "bookmark.fill" : "bookmark")
+                        }
+                        .tint(.blue)
+                        
+                        // Favorites button
+                        let isFavorite = isFavorite(movieDetails.id)
+                        Button("Add to favorites", systemImage: isFavorite ? "heart.fill" : "heart") {
+                            toggleFavorite(movieDetails.id)
+                        }
+                        .tint(.red)
                     }
-                    .tint(.red)
                 }
             }
             
@@ -127,6 +140,22 @@ struct MovieDetailsScreen: View {
         saveContext()
     }
     
+    private func toggleWatchlist(_ movie: MovieDetailsApiModel) {
+        if let watchlistMovie = watchlist.first(where: { $0.id == movie.id }) {
+            context.delete(watchlistMovie)
+        } else {
+            let newWatchlistMovie = WatchlistMovieModel(
+                id: movie.id,
+                title: movie.title,
+                posterPath: movie.posterPath,
+                releaseDate: movie.releaseDate,
+                voteAverage: movie.voteAverage
+            )
+            context.insert(newWatchlistMovie)
+        }
+        saveContext()
+    }
+    
     private func saveContext() {
         do {
             try context.save()
@@ -144,6 +173,6 @@ struct MovieDetailsScreen: View {
         MovieDetailsScreen(id: 278)
             .environment(Router()) // Needed in deeper subview
             .environment(\.httpClient, MockHTTPClient())
-            .modelContainer(try! ModelContainer(for: FavoriteMovie.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true)))
+            .modelContainer(try! ModelContainer(for: FavoriteMovie.self, WatchlistMovieModel.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true)))
     }
 }
