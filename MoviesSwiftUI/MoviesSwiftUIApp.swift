@@ -33,6 +33,7 @@ struct MoviesSwiftUIApp: App {
         do {
             let schema = Schema([
                 FavoriteMovie.self,
+                WatchlistMovieModel.self,
                 ReviewModel.self
             ])
             let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)

@@ -95,16 +95,13 @@ struct MovieDetailsScreen: View {
     
     private func loadDetails() async {
         do {
-            let detailsResource = try Resource(endpoint: .movieDetails(id: id), modelType: MovieDetailsApiModel.self)
-            let castResource = try Resource(endpoint: .cast(movieId: id), modelType: MovieCastApiResponseModel.self)
-            let alternativeTitlesResource = try Resource(endpoint: .alternativeTitles(movieId: id), modelType: MovieAlternativeTitlesResponseModel.self)
-
-            async let fetchedDetails = httpClient.load(detailsResource)
-            async let fetchedCast = httpClient.load(castResource)
-            async let fetchedAlternativeTitles = httpClient.load(alternativeTitlesResource, keyDecodingStrategy: nil)
-            movieDetails = try await fetchedDetails
-            movieCast = try await fetchedCast
-            movieAlternativeTitles = try await fetchedAlternativeTitles
+            async let fetchedDetails = httpClient.load(.movieDetails(id: id), modelType: MovieDetailsApiModel.self)
+            async let fetchedCast = httpClient.load(.cast(movieId: id), modelType: MovieCastApiResponseModel.self)
+            async let fetchedAlternativeTitles = httpClient.load(.alternativeTitles(movieId: id), modelType: MovieAlternativeTitlesResponseModel.self, keyDecodingStrategy: nil)
+            let fetchedData = try await (fetchedDetails, fetchedCast, fetchedAlternativeTitles)
+            movieDetails = fetchedData.0
+            movieCast = fetchedData.1
+            movieAlternativeTitles = fetchedData.2
         } catch {
             showError(error, "Try again later.") {
                 Task {

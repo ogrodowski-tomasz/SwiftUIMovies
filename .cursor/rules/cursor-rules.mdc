@@ -1,0 +1,10 @@
+---
+alwaysApply: true
+Design pattern: MV (Model-View)
+Rely on native SwiftUI's property wrappers: State, Environment, Query etc
+Use Observation framework
+Inject mock services to Previews 
+For every new network endpoint add empty static json file and use this file in Mock service
+For all networking operations use Swift Concurrency framework
+For every screen which relies on data from server, have proper error handling using native alert view component
+---
