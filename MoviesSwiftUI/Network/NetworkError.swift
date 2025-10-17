@@ -7,6 +7,7 @@ enum NetworkError: Error {
     case invalidResponse
     case invalidURL
     case httpError(Int)
+    case generic(path: String, errorMessage: String)
 }
 
 extension NetworkError: LocalizedError {
@@ -25,6 +26,8 @@ extension NetworkError: LocalizedError {
             return NSLocalizedString("Invalid URL", comment: "invalidURL")
         case .httpError(_):
             return NSLocalizedString("Bad request", comment: "badRequest")
+        case .generic(let path, let message):
+            return NSLocalizedString("Missing stubDataFilename", comment: "Missing stubDataFilename for \(path)")
         }
     }
 

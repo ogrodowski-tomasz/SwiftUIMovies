@@ -21,6 +21,14 @@ struct MoviesSwiftUIApp: App {
 
     @State private var showError: Bool = false
     @State private var errorWrapper: ErrorWrapper?
+    
+    var httpClient: HTTPClientProtocol {
+        #if targetEnvironment(simulator)
+        MockHTTPClient()
+        #else
+        HTTPClient()
+        #endif
+    }
 
     init() {
         router = Router()
@@ -48,7 +56,7 @@ struct MoviesSwiftUIApp: App {
             RootView()
                 .environment(router)
                 .environment(currentUserStore)
-                .environment(\.httpClient, HTTPClient())
+                .environment(\.httpClient, httpClient)
                 .environment(\.showError, ShowErrorAction(action: showError))
                 .alert("Error occured!", isPresented: $showError, actions: {
                     if let retryAction = errorWrapper?.retryAction {

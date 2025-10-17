@@ -3,6 +3,8 @@ import Foundation
 protocol AppEndpoint {
     var url: URL? { get }
     var stubDataFilename: String? { get }
+    var method: String { get }
+    var queryItems: [URLQueryItem]? { get }
 }
 
 enum MovieEndpoint {

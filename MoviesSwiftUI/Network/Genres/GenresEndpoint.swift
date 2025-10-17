@@ -5,7 +5,6 @@ enum GenreEndpoint {
 }
 
 extension GenreEndpoint: AppEndpoint {
-
     var scheme: String {
         "https"
     }
@@ -30,6 +29,14 @@ extension GenreEndpoint: AppEndpoint {
         case .movieList:
             return "GenresListStubData"
         }
+    }
+    
+    var method: String {
+        "GET"
+    }
+    
+    var queryItems: [URLQueryItem]? {
+        nil
     }
 
     var url: URL? {

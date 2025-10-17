@@ -5,29 +5,29 @@ enum SearchEndpoint {
 }
 
 extension SearchEndpoint: AppEndpoint {
-
+    
     var scheme: String {
         "https"
     }
-
+    
     var host: String {
         "api.themoviedb.org"
     }
-
+    
     var path: String {
         switch self {
         case .movie:
             return "/3/search/movie"
         }
     }
-
+    
     var stubDataFilename: String? {
         switch self {
         case .movie:
             return "SearchStubData"
         }
     }
-
+    
     var url: URL? {
         var components = URLComponents()
         components.scheme = scheme
@@ -38,5 +38,16 @@ extension SearchEndpoint: AppEndpoint {
             components.queryItems = [URLQueryItem(name: "query", value: query)]
         }
         return components.url
+    }
+    
+    var method: String {
+        "GET"
+    }
+    
+    var queryItems: [URLQueryItem]? {
+        switch self {
+        case .movie(let query):
+            return [URLQueryItem(name: "query", value: query)]
+        }
     }
 }

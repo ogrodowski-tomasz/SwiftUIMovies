@@ -48,7 +48,7 @@ struct MovieListScreen: View {
                 endpoint = .nowPlaying(page: page)
             }
             
-            let result = try await httpClient.load(endpoint, modelType: MovieApiResponseModel.self).results
+            let result = try await httpClient.load(endpoint, modelType: MovieApiResponseModel.self, keyDecodingStrategy: .convertFromSnakeCase).results
             let updated = movies + result
             movies = updated
         } catch {

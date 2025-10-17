@@ -95,9 +95,9 @@ struct MovieDetailsScreen: View {
     
     private func loadDetails() async {
         do {
-            async let fetchedDetails = httpClient.load(.movieDetails(id: id), modelType: MovieDetailsApiModel.self)
-            async let fetchedCast = httpClient.load(.cast(movieId: id), modelType: MovieCastApiResponseModel.self)
-            async let fetchedAlternativeTitles = httpClient.load(.alternativeTitles(movieId: id), modelType: MovieAlternativeTitlesResponseModel.self, keyDecodingStrategy: nil)
+            async let fetchedDetails = httpClient.load(MovieEndpoint.movieDetails(id: id), modelType: MovieDetailsApiModel.self, keyDecodingStrategy: .convertFromSnakeCase)
+            async let fetchedCast = httpClient.load(MovieEndpoint.cast(movieId: id), modelType: MovieCastApiResponseModel.self, keyDecodingStrategy: .convertFromSnakeCase)
+            async let fetchedAlternativeTitles = httpClient.load(MovieEndpoint.alternativeTitles(movieId: id), modelType: MovieAlternativeTitlesResponseModel.self, keyDecodingStrategy: nil)
             let fetchedData = try await (fetchedDetails, fetchedCast, fetchedAlternativeTitles)
             movieDetails = fetchedData.0
             movieCast = fetchedData.1

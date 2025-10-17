@@ -118,9 +118,9 @@ struct MainListScreen: View {
     /// When error is catched user is let to retry this method.
     private func loadData() async {
         do {
-            async let fetchedPopular = httpClient.load(.popular(page: 1), modelType: MovieApiResponseModel.self)
-            async let fetchedTopRated = httpClient.load(.topRated(page: 1), modelType: MovieApiResponseModel.self)
-            async let fetchedNowPlaying = httpClient.load(.nowPlaying(page: 1), modelType: MovieApiResponseModel.self)
+            async let fetchedPopular = httpClient.load(MovieEndpoint.popular(page: 1), modelType: MovieApiResponseModel.self, keyDecodingStrategy: .convertFromSnakeCase)
+            async let fetchedTopRated = httpClient.load(MovieEndpoint.topRated(page: 1), modelType: MovieApiResponseModel.self, keyDecodingStrategy: .convertFromSnakeCase)
+            async let fetchedNowPlaying = httpClient.load(MovieEndpoint.nowPlaying(page: 1), modelType: MovieApiResponseModel.self, keyDecodingStrategy: .convertFromSnakeCase)
             let fetchedData = try await (fetchedTopRated, fetchedPopular, fetchedNowPlaying)
             self.state.topRated = fetchedData.0.results
             self.state.popular = fetchedData.1.results

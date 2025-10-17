@@ -2,22 +2,12 @@ import Foundation
 import SwiftUI
 
 protocol HTTPClientProtocol {
-    func load<T: Codable>(_ resource: Resource<T>, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy?) async throws -> T
-    func load<T: Codable>(_ endpoint: MovieEndpoint, modelType: T.Type, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy?) async throws -> T
-}
-
-extension HTTPClientProtocol {
-    func load<T: Codable>(_ resource: Resource<T>, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = .convertFromSnakeCase) async throws -> T {
-        try await load(resource, keyDecodingStrategy: keyDecodingStrategy)
-    }
-    
-    func load<T: Codable>(_ endpoint: MovieEndpoint, modelType: T.Type, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = .convertFromSnakeCase) async throws -> T {
-        try await load(endpoint, modelType: modelType, keyDecodingStrategy: keyDecodingStrategy)
-    }
+//    func load<T: Codable>(_ resource: Resource<T>, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy?) async throws -> T
+    func load<T: Codable>(_ endpoint: AppEndpoint, modelType: T.Type, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy?) async throws -> T
 }
 
 private struct HTTPClientKey: EnvironmentKey {
-    static var defaultValue: HTTPClientProtocol = HTTPClient()
+    static var defaultValue: HTTPClientProtocol = MockHTTPClient()
 }
 
 extension EnvironmentValues {
@@ -37,58 +27,52 @@ struct HTTPClient: HTTPClientProtocol {
         self.session = URLSession(configuration: configuration)
     }
 
-    func load<T: Codable>(_ resource: Resource<T>, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = nil) async throws -> T {
-
-        var request = URLRequest(url: resource.url)
-        request.httpMethod = resource.method.name
-
-
-        switch resource.method {
-        case .get(let queryItems):
-            var components = URLComponents(url: resource.url, resolvingAgainstBaseURL: false)
-            components?.queryItems = queryItems
-            guard let url = components?.url else {
-                throw NetworkError.badRequest
-            }
-
-            request = URLRequest(url: url)
-
-        case .post(let data):
-            request.httpBody = data
-
-        case .delete:
-            break
-        }
-
-        let (data, response) = try await session.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw NetworkError.invalidResponse
-        }
-
-        guard (200..<300).contains(httpResponse.statusCode) else {
-            throw NetworkError.httpError(httpResponse.statusCode)
-        }
-
-        do {
-//            let jsonObject = try JSONSerialization.jsonObject(with: data)
-//            let prettyData = try JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted)
-//            let prettyString = String(data: prettyData, encoding: .utf8) ?? ""
-//            
-//            print("DEBUG: JSON for url \(resource.url): \(prettyString)")
-            
-            let decoder = JSONDecoder()
-            if let keyDecodingStrategy {
-                decoder.keyDecodingStrategy = keyDecodingStrategy
-            }
-            let result = try decoder.decode(resource.modelType, from: data)
-            return result
-        } catch {
-            throw NetworkError.decodingError(error)
-        }
-    }
+//    func load<T: Codable>(_ resource: Resource<T>, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = nil) async throws -> T {
+//
+//        var request = URLRequest(url: resource.url)
+//        request.httpMethod = resource.method.name
+//
+//
+//        switch resource.method {
+//        case .get(let queryItems):
+//            var components = URLComponents(url: resource.url, resolvingAgainstBaseURL: false)
+//            components?.queryItems = queryItems
+//            guard let url = components?.url else {
+//                throw NetworkError.badRequest
+//            }
+//
+//            request = URLRequest(url: url)
+//
+//        case .post(let data):
+//            request.httpBody = data
+//
+//        case .delete:
+//            break
+//        }
+//
+//        let (data, response) = try await session.data(for: request)
+//
+//        guard let httpResponse = response as? HTTPURLResponse else {
+//            throw NetworkError.invalidResponse
+//        }
+//
+//        guard (200..<300).contains(httpResponse.statusCode) else {
+//            throw NetworkError.httpError(httpResponse.statusCode)
+//        }
+//
+//        do {
+//            let decoder = JSONDecoder()
+//            if let keyDecodingStrategy {
+//                decoder.keyDecodingStrategy = keyDecodingStrategy
+//            }
+//            let result = try decoder.decode(resource.modelType, from: data)
+//            return result
+//        } catch {
+//            throw NetworkError.decodingError(error)
+//        }
+//    }
     
-    func load<T>(_ endpoint: MovieEndpoint, modelType: T.Type, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy?) async throws -> T where T : Decodable, T : Encodable {
+    func load<T>(_ endpoint: AppEndpoint, modelType: T.Type, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy?) async throws -> T where T : Decodable, T : Encodable {
         guard let url = endpoint.url else { throw NetworkError.invalidURL }
         
         var request = URLRequest(url: url)
@@ -130,11 +114,19 @@ struct HTTPClient: HTTPClientProtocol {
 
 struct MockHTTPClient: HTTPClientProtocol {
     
-    func load<T>(_ resource: Resource<T>, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy?) async throws -> T where T : Decodable, T : Encodable {
-        guard let filename = resource.stubFileName else {
-            throw NetworkError.invalidURL
+//    func load<T>(_ resource: Resource<T>, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy?) async throws -> T where T : Decodable, T : Encodable {
+//        guard let filename = resource.stubFileName else {
+//            throw NetworkError.invalidURL
+//        }
+//        return try StaticJSONMapper.decode(file: filename, type: T.self, keyDecodingStrategy: keyDecodingStrategy)
+//        
+//    }
+    
+    func load<T>(_ endpoint: AppEndpoint, modelType: T.Type, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy?) async throws -> T where T : Decodable, T : Encodable {
+        guard let filename = endpoint.stubDataFilename else {
+            throw NetworkError.generic(path: endpoint.url?.description ?? "unknown", errorMessage: "missing filename")
         }
         return try StaticJSONMapper.decode(file: filename, type: T.self, keyDecodingStrategy: keyDecodingStrategy)
+        
     }
 }
-

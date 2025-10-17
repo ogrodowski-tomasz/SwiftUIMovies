@@ -20,11 +20,7 @@ struct MovieNetworkManager: MovieNetworkManagerProtocol {
     let httpClient: HTTPClientProtocol
 
     func load<T: Codable>(endpoint: MovieEndpoint, decodeToType type: T.Type, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy?) async throws -> T {
-        guard let url = endpoint.url else {
-            throw NetworkError.invalidURL
-        }
-        let resource = Resource(url: url, modelType: T.self)
-        return try await httpClient.load(resource, keyDecodingStrategy: keyDecodingStrategy)
+        return try await httpClient.load(endpoint, modelType: type, keyDecodingStrategy: keyDecodingStrategy)
     }
 }
 
