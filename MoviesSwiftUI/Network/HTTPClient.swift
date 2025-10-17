@@ -3,6 +3,7 @@ import SwiftUI
 
 protocol HTTPClientProtocol {
     func load<T: Codable>(_ resource: Resource<T>, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy?) async throws -> T
+    func load<T: Codable>(_ endpoint: MovieEndpoint, modelType: T.Type, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy?) async throws -> T
 }
 
 extension HTTPClientProtocol {
@@ -11,8 +12,7 @@ extension HTTPClientProtocol {
     }
     
     func load<T: Codable>(_ endpoint: MovieEndpoint, modelType: T.Type, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = .convertFromSnakeCase) async throws -> T {
-        let resource = try Resource(endpoint: endpoint, modelType: modelType)
-        return try await load(resource, keyDecodingStrategy: keyDecodingStrategy)
+        try await load(endpoint, modelType: modelType, keyDecodingStrategy: keyDecodingStrategy)
     }
 }
 
@@ -82,6 +82,44 @@ struct HTTPClient: HTTPClientProtocol {
                 decoder.keyDecodingStrategy = keyDecodingStrategy
             }
             let result = try decoder.decode(resource.modelType, from: data)
+            return result
+        } catch {
+            throw NetworkError.decodingError(error)
+        }
+    }
+    
+    func load<T>(_ endpoint: MovieEndpoint, modelType: T.Type, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy?) async throws -> T where T : Decodable, T : Encodable {
+        guard let url = endpoint.url else { throw NetworkError.invalidURL }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = endpoint.method
+        
+        if let queryItems = endpoint.queryItems {
+            var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+            components?.queryItems = queryItems
+            guard let url = components?.url else {
+                throw NetworkError.badRequest
+            }
+
+            request = URLRequest(url: url)
+        }
+
+        let (data, response) = try await session.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NetworkError.invalidResponse
+        }
+
+        guard (200..<300).contains(httpResponse.statusCode) else {
+            throw NetworkError.httpError(httpResponse.statusCode)
+        }
+
+        do {
+            let decoder = JSONDecoder()
+            if let keyDecodingStrategy {
+                decoder.keyDecodingStrategy = keyDecodingStrategy
+            }
+            let result = try decoder.decode(modelType, from: data)
             return result
         } catch {
             throw NetworkError.decodingError(error)

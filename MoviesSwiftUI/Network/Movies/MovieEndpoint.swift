@@ -6,9 +6,9 @@ protocol AppEndpoint {
 }
 
 enum MovieEndpoint {
-    case topRated
-    case popular
-    case nowPlaying
+    case topRated(page: Int)
+    case popular(page: Int)
+    case nowPlaying(page: Int)
     case movieDetails(id: Int)
     case cast(movieId: Int)
     case collectionDetails(collectionID: Int)
@@ -28,6 +28,12 @@ extension MovieEndpoint: AppEndpoint {
 
     var baseURL: String {
         "https://api.themoviedb.org/3/"
+    }
+    
+    var method: String {
+        switch self {
+        default: return "GET"
+        }
     }
 
     var path: String {
@@ -74,12 +80,12 @@ extension MovieEndpoint: AppEndpoint {
 
     var queryItems: [URLQueryItem]? {
         switch self {
-        case .topRated, .movieDetails, .popular, .nowPlaying:
+        case let .topRated(page), let .popular(page), let .nowPlaying(page):
             return [
                 URLQueryItem(name: "language", value: "en-US"),
-                URLQueryItem(name: "page", value: "1"),
+                URLQueryItem(name: "page", value: "\(page)"),
             ]
-        case .cast, .collectionDetails, .alternativeTitles, .personDetails:
+        case .cast, .collectionDetails, .alternativeTitles, .personDetails, .movieDetails:
             return nil
         }
     }

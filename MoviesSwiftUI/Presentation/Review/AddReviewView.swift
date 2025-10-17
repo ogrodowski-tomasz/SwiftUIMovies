@@ -89,7 +89,7 @@ struct AddReviewView: View {
     NavigationStack {
         AddReviewView(
             movie: try! StaticJSONMapper.decode(
-                file: MovieEndpoint.topRated.stubDataFilename!,
+                file: MovieEndpoint.topRated(page: 1).stubDataFilename!,
                 type: MovieApiResponseModel.self
             ).results.first!
         )
